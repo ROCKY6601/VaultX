@@ -29,8 +29,16 @@ jobs:
 
       - name: Build release APK
         run: |
-          # Project folder khud dhundh lo (chahe files repo ke andar kisi folder mein hon)
-          SETTINGS=$(find . -maxdepth 3 -name "settings.gradle.kts" | head -1)
+          # Agar zip file hi upload hui hai to usse khud extract kar lo
+          if [ -z "$(find . -maxdepth 4 -name settings.gradle.kts -not -path './.git/*' | head -1)" ]; then
+            ZIP=$(find . -maxdepth 2 -iname "*.zip" | head -1)
+            if [ -n "$ZIP" ]; then
+              echo "Extracting $ZIP"
+              mkdir -p /tmp/proj && unzip -q -o "$ZIP" -d /tmp/proj
+              cp -r /tmp/proj/. ./
+            fi
+          fi
+          SETTINGS=$(find . -maxdepth 4 -name "settings.gradle.kts" -not -path './.git/*' | head -1)
           if [ -z "$SETTINGS" ]; then
             echo "ERROR: settings.gradle.kts nahi mili. Repo mein ye files upload karo:"
             find . -maxdepth 3 -not -path './.git/*' | head -50
